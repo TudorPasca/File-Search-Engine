@@ -5,12 +5,12 @@ A file search engine that indexes the contents of my local system. Enables filte
 The system interacts with the user via web browser. The data is scraped from the local file system upon application startup.
 The overall system context is as follows:
 
-![System Context Diagram](SD-System.drawio.png)
+![System Context Diagram](diagrams/SD-System.drawio.png)
 
 ## Containers
 The overall system is comprised of several containers:
 
-![Containers Diagram](SD-Containers.drawio.png)
+![Containers Diagram](diagrams/SD-Containers.drawio.png)
 
 ### Web Application Container (Front End)
 The front-end container is the Web Application Container. The user accesses it via the browser. The web app uses **Angular** (and **Angular Material**).
@@ -29,7 +29,7 @@ The Index Builder is responsible for scraping the file tree and uploading it to 
 ## Classes
 The class structure is outlined in the following diagram:
 
-![Class Diagram](SD-Classes.drawio.png)
+![Class Diagram](diagrams/SD-Classes.drawio.png)
 
 The general idea is as follows:
 * The API will feature a classic layered architecture, split into Controller, Service, and Data classes. The communication will be made with DTO objects.
