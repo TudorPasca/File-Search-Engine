@@ -22,10 +22,10 @@ FileDTO::FileDTO(const filesystem::directory_entry &entry) {
     }
 }
 
-inline const string& FileDTO::getName() const { return name; }
+const string& FileDTO::getName() const { return name; }
 
-inline const string& FileDTO::getAbsolutePath() const { return absolutePath; }
+const string& FileDTO::getAbsolutePath() const { return absolutePath; }
 
-inline bool FileDTO::isFolder() const { return folder; }
+const bool FileDTO::isFolder() const { return folder; }
 
-inline const string& FileDTO::getContents() const { return contents; }
+const string& FileDTO::getContents() const { return contents; }

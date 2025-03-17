@@ -10,7 +10,7 @@ public:
     explicit FileDTO(const std::filesystem::directory_entry &entry);
     const std::string& getName() const;
     const std::string& getAbsolutePath() const;
-    bool isFolder() const;
+    const bool isFolder() const;
     const std::string& getContents() const;
 private:
     std::string name;
