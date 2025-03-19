@@ -1,10 +1,8 @@
 #include "../../include/IndexBuilder/RegexFileIgnorer.h"
 
-using namespace std;
-
 RegexFileIgnorer::RegexFileIgnorer(const std::vector<std::string>& patterns) {
     for (const auto& pattern : patterns) {
-        regexes.emplace_back(pattern, regex::icase);
+        regexes.emplace_back(pattern, std::regex::icase);
     }
 }
 

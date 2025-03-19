@@ -3,12 +3,10 @@
 #include <fstream>
 #include <sstream>
 
-using namespace std;
-
 FileDTO::FileDTO(std::string name, std::string  absolutePath, bool folder, std::string contents):
 name(std::move(name)), absolutePath(std::move(absolutePath)), folder(folder), contents(std::move(contents)) {}
 
-FileDTO::FileDTO(const filesystem::directory_entry &entry) {
+FileDTO::FileDTO(const std::filesystem::directory_entry &entry) {
     name = entry.path().filename().string();
     absolutePath = entry.path().string();
     folder = entry.is_directory();
@@ -22,10 +20,10 @@ FileDTO::FileDTO(const filesystem::directory_entry &entry) {
     }
 }
 
-const string& FileDTO::getName() const { return name; }
+const std::string& FileDTO::getName() const { return name; }
 
-const string& FileDTO::getAbsolutePath() const { return absolutePath; }
+const std::string& FileDTO::getAbsolutePath() const { return absolutePath; }
 
 const bool FileDTO::isFolder() const { return folder; }
 
-const string& FileDTO::getContents() const { return contents; }
+const std::string& FileDTO::getContents() const { return contents; }
