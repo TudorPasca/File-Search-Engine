@@ -3,23 +3,10 @@
 
 namespace fs = std::filesystem;
 
-pqxx::connection IndexBuilder::createDBConnection() const {
-    try {
-        pqxx::connection conn(CONNECTION_STRING);
-        if (!conn.is_open()) {
-            throw std::runtime_error("Failed to open database connection.");
-        }
-        return conn;
-    } catch (const std::exception &e) {
-        std::cerr << "Database connection error: " << e.what() << std::endl;
-        throw;
-    }
-}
-
 void IndexBuilder::indexFiles(const std::filesystem::path &path) const {
     std::vector<FileDTO> files = scraper->getFilesRecursively(path);
-    pqxx::connection conn = createDBConnection();
     try {
+        pqxx::connection conn(CONNECTION_STRING);
         pqxx::work txn(conn);
         for (const auto &file: files) {
             std::string query = R"(INSERT INTO public.file ("path", "content", is_folder)

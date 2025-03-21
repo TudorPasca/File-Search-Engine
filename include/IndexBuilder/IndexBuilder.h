@@ -12,10 +12,7 @@ public:
         scraper(std::move(scraper)), CONNECTION_STRING(connectionString) {};
 
     void indexFiles(const std::filesystem::path& path) const;
-
 private:
-    pqxx::connection createDBConnection() const;
-
     std::shared_ptr<IFileScraper> scraper;
     const std::string CONNECTION_STRING;
 };
