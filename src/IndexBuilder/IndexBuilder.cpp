@@ -21,11 +21,15 @@ void IndexBuilder::indexFiles(const std::filesystem::path &path) const {
     pqxx::connection conn = createDBConnection();
     try {
         pqxx::work txn(conn);
-        for (const auto &file : files) {
-            std::string query = R"(INSERT INTO public.file ("path", "content", is_folder) VALUES ()"
+        for (const auto &file: files) {
+            std::string query = R"(INSERT INTO public.file ("path", "content", is_folder)
+                       VALUES ( )"
                                 + txn.quote(file.getAbsolutePath()) + ", "
                                 + txn.quote(file.getContents()) + ", "
-                                + txn.quote(file.isFolder()) + ")";
+                                + txn.quote(file.isFolder()) + R"()
+                       ON CONFLICT ("path") DO UPDATE SET
+                       "content" = EXCLUDED."content",
+                       is_folder = EXCLUDED.is_folder)";
             txn.exec(query);
         }
         txn.commit();
