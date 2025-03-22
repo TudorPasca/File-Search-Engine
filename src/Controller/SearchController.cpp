@@ -21,10 +21,6 @@ void SearchController::registerRoutes(crow::App<crow::CORSHandler> &app) {
                         }
                         crow::json::wvalue jsonResponse;
                         jsonResponse["results"] = std::move(jsonList);
-                        crow::response response(jsonResponse);
-                        response.add_header("Access-Control-Allow-Origin", "http://localhost:4200");
-                        response.add_header("Access-Control-Allow-Methods", "GET, OPTIONS");
-                        response.add_header("Access-Control-Allow-Headers", "Content-Type, Authorization");
                         return crow::response(jsonResponse);
                     });
 }
