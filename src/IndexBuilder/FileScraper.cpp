@@ -1,7 +1,5 @@
 #include "../../include/IndexBuilder/FileScraper.h"
 
-#include <string>
-#include <vector>
 #include <filesystem>
 #include <iostream>
 
