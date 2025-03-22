@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <crow/app.h>
+#include <crow/middlewares/cors.h>
 #include "../include/IndexBuilder/FileScraper.h"
 #include "../include/IndexBuilder/RegexFileIgnorer.h"
 #include "../include/IndexBuilder/IndexBuilder.h"
@@ -21,7 +22,15 @@ int main() {
     ///Server
     auto fileRepository = std::make_shared<FileRepository>(DB_CONNECTION_STRING);
     auto searchService = std::make_shared<SearchService>(fileRepository);
-    crow::SimpleApp app;
+
+    crow::App<crow::CORSHandler> app;
+    auto &cors = app.get_middleware<crow::CORSHandler>();
+    cors.global()
+            .origin("http://localhost:4200")
+            .allow_credentials()
+            .methods("POST"_method, "GET"_method);
+
+
     SearchController searchController(searchService);
     searchController.registerRoutes(app);
     app.port(18080).multithreaded().run();
