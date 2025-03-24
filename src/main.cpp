@@ -17,7 +17,7 @@ int main() {
 
     ///Indexing
     const std::string DB_CONNECTION_STRING = "host=localhost port=5432 dbname=file_search user=postgres password=123QWEasd";
-    std::vector<std::string> ignorePatterns = {R"(^.*\.(?!(txt|json|cpp|c|h|hpp)$)[A-Za-z0-9]+$)"};
+    std::vector<std::string> ignorePatterns = {R"(^.*\.(?!(txt|json|cpp|c|h|py|java|in|out)$)[A-Za-z0-9]+$)"};
     auto ignorer = std::make_shared<RegexFileIgnorer>(ignorePatterns);
     auto scraper = std::make_shared<FileScraper>(ignorer);
     auto indexBuilder = std::make_shared<IndexBuilder>(scraper, DB_CONNECTION_STRING);

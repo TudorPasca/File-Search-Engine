@@ -8,11 +8,10 @@ namespace fs = std::filesystem;
 
 void IndexBuilder::indexFiles(const std::filesystem::path &path) {
     std::vector<FileDTO> files = scraper->getFilesRecursively(path);
-    writeToLog(path, files);
     try {
         pqxx::connection conn(CONNECTION_STRING);
-        pqxx::work txn(conn);
         for (const auto &file: files) {
+            pqxx::work txn(conn);
             std::string query = R"(INSERT INTO public.file (filename, path, content, is_folder)
                        VALUES ( )"
                                 + txn.quote(file.getName()) + ", "
@@ -24,8 +23,9 @@ void IndexBuilder::indexFiles(const std::filesystem::path &path) {
                        content = EXCLUDED.content,
                        is_folder = EXCLUDED.is_folder)";
             txn.exec(query);
+            txn.commit();
         }
-        txn.commit();
+        writeToLog(path, files);
     } catch (const std::exception &e) {
         std::cerr << "Error during file indexing: " << e.what() << std::endl;
     }
