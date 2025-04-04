@@ -27,3 +27,13 @@ const std::string& FileDTO::getAbsolutePath() const { return absolutePath; }
 const bool FileDTO::isFolder() const { return folder; }
 
 const std::string& FileDTO::getContents() const { return contents; }
+
+std::string FileDTO::getExtension() const {
+    std::string::size_type lastDot = absolutePath.find_last_of('.');
+    std::string::size_type lastSlash = absolutePath.find_last_of("/\\");
+    if (lastDot != std::string::npos
+            && (lastSlash == std::string::npos || lastDot > lastSlash)) {
+        return absolutePath.substr(lastDot + 1);
+    }
+    return "";
+}

@@ -12,6 +12,7 @@ public:
     const std::string& getAbsolutePath() const;
     const bool isFolder() const;
     const std::string& getContents() const;
+    std::string getExtension() const;
 private:
     std::string name;
     std::string absolutePath;
