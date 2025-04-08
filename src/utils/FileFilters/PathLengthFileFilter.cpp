@@ -3,6 +3,6 @@
 PathLengthFileFilter::PathLengthFileFilter(std::string::size_type length)
     : length(length) {}
 
-bool PathLengthFileFilter::filter(const FileDTO &file) const {
+bool PathLengthFileFilter::matches(const FileDTO &file) const {
     return file.getAbsolutePath().size() == length;
 }
