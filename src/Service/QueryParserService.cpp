@@ -12,9 +12,6 @@ std::vector<std::unique_ptr<IFileFilter>> QueryParserService::parseQuery(std::st
     std::string query_str(query);
     std::istringstream iss(query_str);
     std::string segment;
-
-    std::vector<std::string> pathKeywords, contentKeywords, extensions;
-    size_t targetPathLength;
     bool pathLengthSet = false;
     while (iss >> segment) {
         size_t colonPos = segment.find(':');
@@ -24,15 +21,16 @@ std::vector<std::unique_ptr<IFileFilter>> QueryParserService::parseQuery(std::st
         std::string qualifier = segment.substr(0, colonPos);
         std::string value = segment.substr(colonPos + 1);
         if (qualifier == "path") {
-            pathKeywords.push_back(value);
+            filters.push_back(std::make_unique<PathKeywordFileFilter>(value));
         } else if (qualifier == "content") {
-            contentKeywords.push_back(value);
+            filters.push_back(std::make_unique<ContentFileFilter>(value));
         } else if (qualifier == "extension") {
-            extensions.push_back(value);
+            filters.push_back(std::make_unique<FileExtensionFilter>(value));
         } else if (qualifier == "length") {
             if (pathLengthSet) {
                 throw std::invalid_argument("Duplicate path length constraint: " + segment);
             }
+            size_t targetPathLength;
             pathLengthSet = true;
             const char* value_start = value.data();
             const char* value_end = value_start + value.size();
@@ -40,16 +38,8 @@ std::vector<std::unique_ptr<IFileFilter>> QueryParserService::parseQuery(std::st
             if (result.ec != std::errc() || result.ptr != value_end) {
                 throw std::invalid_argument("Invalid query format: " + segment);
             }
+            filters.push_back(std::make_unique<PathLengthFileFilter>(targetPathLength));
         }
     }
-
-    if (!pathKeywords.empty())
-        filters.push_back(std::make_unique<PathKeywordFileFilter>(pathKeywords));
-    if (!contentKeywords.empty())
-        filters.push_back(std::make_unique<ContentFileFilter>(contentKeywords));
-    if (!extensions.empty())
-        filters.push_back(std::make_unique<FileExtensionFilter>(extensions));
-    if (pathLengthSet)
-        filters.push_back(std::make_unique<PathLengthFileFilter>(targetPathLength));
     return filters;
 }
