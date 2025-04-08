@@ -4,8 +4,9 @@
 
 class ContentFileFilter: public IFileFilter {
 public:
-    explicit ContentFileFilter(std::vector<std::string> targetContents);
-    [[nodiscard]] bool matches(const FileDTO& file) const override;
+    explicit ContentFileFilter(std::string content)
+        : content(std::move(content)) {}
+    [[nodiscard]] const std::string& getContent() const;
 private:
-    const std::vector<std::string> targetContents;
+    const std::string content
 };

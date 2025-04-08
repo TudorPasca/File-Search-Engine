@@ -4,8 +4,9 @@
 
 class PathKeywordFileFilter: public IFileFilter {
 public:
-    explicit PathKeywordFileFilter(std::vector<std::string> keywords);
-    [[nodiscard]] bool matches(const FileDTO& file) const override;
+    explicit PathKeywordFileFilter(std::string keyword)
+        : keyword(std::move(keyword)) {}
+    [[nodiscard]] const std::string& getKeyword() const;
 private:
-    const std::vector<std::string> keywords;
+    const std::string keyword;
 };

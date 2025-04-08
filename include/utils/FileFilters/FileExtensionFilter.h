@@ -4,8 +4,9 @@
 
 class FileExtensionFilter: public IFileFilter {
 public:
-    explicit FileExtensionFilter(std::vector<std::string> extensions);
-    [[nodiscard]] bool matches(const FileDTO &file) const override;
+    explicit FileExtensionFilter(std::string extension)
+        : extension(std::move(extension)) {}
+    [[nodiscard]] const std::string& getExtension() const;
 private:
-    std::vector<std::string> extensions;
+    std::string extension;
 };
