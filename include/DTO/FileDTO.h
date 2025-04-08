@@ -6,7 +6,7 @@
 
 class FileDTO {
 public:
-    FileDTO(std::string  name, std::string  absolutePath, bool folder, std::string contents);
+    FileDTO(std::string  name, std::string  absolutePath, bool folder, std::string contents, std::string extension, uint64_t size_bytes);
     explicit FileDTO(const std::filesystem::directory_entry &entry);
     const std::string& getName() const;
     const std::string& getAbsolutePath() const;
@@ -18,4 +18,6 @@ private:
     std::string absolutePath;
     bool folder;
     std::string contents;
+    std::string extension;
+    uint64_t size_bytes;
 };
