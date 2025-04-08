@@ -8,5 +8,5 @@ public:
         : content(std::move(content)) {}
     [[nodiscard]] const std::string& getContent() const;
 private:
-    const std::string content
+    const std::string content;
 };

@@ -10,21 +10,38 @@ void IndexBuilder::indexFiles(const std::filesystem::path &path) {
     std::vector<FileDTO> files = scraper->getFilesRecursively(path);
     try {
         pqxx::connection conn(CONNECTION_STRING);
+        pqxx::work txn(conn);
+        const std::string preparedStatement = "insert_update_file";
+        conn.prepare(preparedStatement, R"(
+            INSERT INTO public.file (filename, path, content, is_folder, extension, size_bytes)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            ON CONFLICT (path) DO UPDATE SET
+                filename = EXCLUDED.filename,
+                content = EXCLUDED.content,
+                is_folder = EXCLUDED.is_folder,
+                extension = EXCLUDED.extension,
+                size_bytes = EXCLUDED.size_bytes
+        )");
         for (const auto &file: files) {
-            pqxx::work txn(conn);
-            std::string query = R"(INSERT INTO public.file (filename, path, content, is_folder)
-                       VALUES ( )"
-                                + txn.quote(file.getName()) + ", "
-                                + txn.quote(file.getAbsolutePath()) + ", "
-                                + txn.quote(file.getContents()) + ", "
-                                + txn.quote(file.isFolder()) + R"()
-                       ON CONFLICT (path) DO UPDATE SET
-                       filename = EXCLUDED.filename,
-                       content = EXCLUDED.content,
-                       is_folder = EXCLUDED.is_folder)";
-            txn.exec(query);
-            txn.commit();
+            pqxx::subtransaction file_savepoint(txn);
+            try {
+                file_savepoint.exec_prepared(preparedStatement,
+                                             file.getName(),
+                                             file.getAbsolutePath(),
+                                             file.getContents(),
+                                             file.isFolder(),
+                                             file.getExtension(),
+                                             file.getSizeBytes());
+                file_savepoint.commit();
+            } catch (const pqxx::sql_error &e) {
+                std::cerr << "[IndexBuilder] Error for file: " << file.getAbsolutePath()
+                          << ": " << e.sqlstate() << " | " << e.what() << std::endl;
+            } catch (const std::exception &e) {
+                std::cerr << "[IndexBuilder] Error for file (skipping): " << file.getAbsolutePath()
+                          << ": " << e.what() << std::endl;
+            }
         }
+        txn.commit();
         writeToLog(path, files);
     } catch (const std::exception &e) {
         std::cerr << "Error during file indexing: " << e.what() << std::endl;
