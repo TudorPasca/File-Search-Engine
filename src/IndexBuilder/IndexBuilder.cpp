@@ -1,13 +1,14 @@
 #include "../../include/IndexBuilder/IndexBuilder.h"
 
 #include <ostream>
-#include <iomanip>
-#include <chrono>
 
 namespace fs = std::filesystem;
 
 void IndexBuilder::indexFiles(const std::filesystem::path &path) {
+    logger->logInfo("[IndexBuilder] Starting indexing files from " + path.generic_string());
     std::vector<FileDTO> files = scraper->getFilesRecursively(path);
+    if (files.empty())
+        logger->logWarning("[IndexBuilder] No files found in path " + path.generic_string());
     try {
         pqxx::connection conn(CONNECTION_STRING);
         pqxx::work txn(conn);
@@ -34,35 +35,14 @@ void IndexBuilder::indexFiles(const std::filesystem::path &path) {
                                              file.getSizeBytes());
                 file_savepoint.commit();
             } catch (const pqxx::sql_error &e) {
-                std::cerr << "[IndexBuilder] Error for file: " << file.getAbsolutePath()
-                          << ": " << e.sqlstate() << " | " << e.what() << std::endl;
+                logger->logError("[IndexBuilder] SQL exception for file: " + file.getAbsolutePath() + ": " + e.sqlstate());
             } catch (const std::exception &e) {
-                std::cerr << "[IndexBuilder] Error for file (skipping): " << file.getAbsolutePath()
-                          << ": " << e.what() << std::endl;
+                logger->logError("[IndexBuilder] Exception for file (skipping) " + file.getAbsolutePath() + ": " + e.what());
             }
         }
         txn.commit();
-        writeToLog(path, files);
     } catch (const std::exception &e) {
-        std::cerr << "Error during file indexing: " << e.what() << std::endl;
+        logger->logError("[IndexBuilder] CRITICAL ERROR - INDEXING FAILED FOR PATH " + path.generic_string() + ": " + e.what());
     }
-}
-
-void IndexBuilder::writeToLog(const std::filesystem::path &path, std::vector<FileDTO> files) {
-    if (!logFile.is_open()) {
-        std::cerr << "Log file is not open!" << std::endl;
-        return;
-    }
-
-    auto now = std::chrono::system_clock::now();
-    auto time = std::chrono::system_clock::to_time_t(now);
-    std::stringstream time_ss;
-    time_ss << std::put_time(std::localtime(&time), "%Y-%m-%d %H:%M:%S");
-
-    logFile << "[" << time_ss.str() << "] Indexing path: " << path.string() << std::endl;
-    for (const auto &file: files) {
-        logFile << "  - " << file.getAbsolutePath() << (file.isFolder() ? " (Folder)" : " (File)") << std::endl;
-    }
-    logFile << "----------------------------------------" << std::endl;
-    logFile.flush();
+    logger->logInfo("[IndexBuilder] Indexing finished for path " + path.generic_string());
 }
