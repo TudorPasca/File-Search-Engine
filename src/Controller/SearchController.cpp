@@ -23,4 +23,22 @@ void SearchController::registerRoutes(crow::App<crow::CORSHandler> &app) {
                         jsonResponse["results"] = std::move(jsonList);
                         return crow::response(jsonResponse);
                     });
+
+    CROW_ROUTE(app, "/suggestions")
+            .methods("GET"_method)
+                    ([this](const crow::request& req) {
+                        char* prefixQuery = req.url_params.get("p");
+                        if (!prefixQuery) {
+                            return crow::response(400, "Missing suggestion prefix parameter 'p'");
+                        }
+                        std::string prefixStr(prefixQuery);
+                        int limit = 5;
+                        std::vector<std::string> suggestions = this->suggestionService->getSuggestions(prefixStr, limit);
+                        crow::json::wvalue jsonSuggestionList(crow::json::type::List);
+                        size_t index = 0;
+                        for (const auto& suggestion : suggestions) {
+                            jsonSuggestionList[index++] = suggestion;
+                        }
+                        return crow::response(jsonSuggestionList);
+                    });
 }
