@@ -18,7 +18,12 @@ std::vector<FileDTO> FileScraper::getRegularFiles(const fs::directory_entry& ent
         if (ignorer != nullptr && ignorer->shouldIgnore(it.path().string()))
             continue;
         if (it.is_regular_file()) {
-            files.emplace_back(it);
+            auto file = FileDTO(it);
+            if (fileScorer != nullptr) {
+                double score = fileScorer->calculateScore(it);
+                file.setScore(score);
+            }
+            files.push_back(file);
         }
     }
     return files;
@@ -46,7 +51,12 @@ std::vector<FileDTO> FileScraper::getFilesRecursively(const std::filesystem::dir
         }
         if (ignorer != nullptr && ignorer->shouldIgnore(it.path().string()))
             continue;
-        files.emplace_back(it);
+        auto file = FileDTO(it);
+        if (fileScorer != nullptr) {
+            double score = fileScorer->calculateScore(it);
+            file.setScore(score);
+        }
+        files.push_back(file);
     }
     return files;
 }
