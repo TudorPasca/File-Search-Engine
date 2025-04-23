@@ -14,6 +14,8 @@ public:
     const std::string& getContents() const;
     const std::string getExtension() const;
     const uint64_t getSizeBytes() const;
+    const double getScore() const;
+    void setScore(double d);
 private:
     std::string name;
     std::string absolutePath;
@@ -21,4 +23,5 @@ private:
     std::string contents;
     std::string extension;
     uint64_t sizeBytes;
+    double score;
 };
