@@ -13,6 +13,10 @@
 #include "../include/Controller/IndexController.h"
 #include "../include/Service/QueryParserService.h"
 #include "../include/IndexBuilder/FileLogger.h"
+#include "../include/IndexBuilder/FileScoringService.h"
+#include "../include/Repository/SuggestionRepository.h"
+#include "../include/Service/SearchSuggestions/SuggestionService.h"
+#include "../include/Service/SearchSuggestions/SearchHistoryTracker.h"
 
 int main() {
     std::vector<std::shared_ptr<IController>> controllers;
@@ -20,7 +24,8 @@ int main() {
     ///Indexing
     std::vector<std::string> ignorePatterns = {R"(^.*\.(?!(txt|json|cpp|c|h|py|java|xml|log)$)[A-Za-z0-9_]+$)"};
     auto ignorer = std::make_shared<RegexFileIgnorer>(ignorePatterns);
-    auto scraper = std::make_shared<FileScraper>(ignorer);
+    auto fileScorer = std::make_shared<FileScoringService>();
+    auto scraper = std::make_shared<FileScraper>(ignorer, fileScorer);
 
     auto logger = std::make_shared<FileLogger>(std::string("index_log.txt"), LogLevel::LOG_INFO);
 
@@ -30,13 +35,20 @@ int main() {
     auto indexController = std::make_shared<IndexController>(indexService);
     controllers.push_back(indexController);
 
-    indexBuilder->indexFiles("C:\\test");
+    indexBuilder->indexFiles("D:\\Tudor\\School");
 
     ///Searching
     auto fileRepository = std::make_shared<FileRepository>(DB_CONNECTION_STRING);
     auto queryParserService = std::make_shared<QueryParserService>();
     auto searchService = std::make_shared<SearchService>(fileRepository, queryParserService);
-    auto searchController = std::make_shared<SearchController>(searchService);
+
+    //Suggestions
+    auto suggestionRepository = std::make_shared<SuggestionRepository>(DB_CONNECTION_STRING);
+    auto suggestionService = std::make_shared<SuggestionService>(suggestionRepository);
+    auto searchHistoryTracker = std::make_shared<SearchHistoryTracker>(DB_CONNECTION_STRING);
+    searchService->addObserver(searchHistoryTracker);
+
+    auto searchController = std::make_shared<SearchController>(searchService, suggestionService);
     controllers.push_back(searchController);
 
     crow::App<crow::CORSHandler> app;

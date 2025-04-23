@@ -6,6 +6,7 @@
 #include "../Service/SearchService.h"
 #include "IController.h"
 #include "../utils/FileFilters/IFileFilter.h"
+#include "../Service/SearchSuggestions/SuggestionService.h"
 
 class SearchController : public IController {
 public:
