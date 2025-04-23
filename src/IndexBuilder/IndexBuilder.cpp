@@ -14,14 +14,15 @@ void IndexBuilder::indexFiles(const std::filesystem::path &path) {
         pqxx::work txn(conn);
         const std::string preparedStatement = "insert_update_file";
         conn.prepare(preparedStatement, R"(
-            INSERT INTO public.file (filename, path, content, is_folder, extension, size_bytes)
-            VALUES ($1, $2, $3, $4, $5, $6)
+            INSERT INTO public.file (filename, path, content, is_folder, extension, size_bytes, score)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
             ON CONFLICT (path) DO UPDATE SET
                 filename = EXCLUDED.filename,
                 content = EXCLUDED.content,
                 is_folder = EXCLUDED.is_folder,
                 extension = EXCLUDED.extension,
-                size_bytes = EXCLUDED.size_bytes
+                size_bytes = EXCLUDED.size_bytes,
+                score = EXCLUDED.score
         )");
         for (const auto &file: files) {
             pqxx::subtransaction file_savepoint(txn);
@@ -32,7 +33,8 @@ void IndexBuilder::indexFiles(const std::filesystem::path &path) {
                                              file.getContents(),
                                              file.isFolder(),
                                              file.getExtension(),
-                                             file.getSizeBytes());
+                                             file.getSizeBytes(),
+                                             file.getScore());
                 file_savepoint.commit();
             } catch (const pqxx::sql_error &e) {
                 logger->logError("[IndexBuilder] SQL exception for file: " + file.getAbsolutePath() + ": " + e.sqlstate());
