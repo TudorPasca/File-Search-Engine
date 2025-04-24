@@ -4,18 +4,21 @@
 #include <sstream>
 
 namespace FileDTOConstants {
-    constexpr std::streamsize PREVIEW_LENGTH = 50;
+    constexpr std::streamsize PREVIEW_LENGTH = 200;
 }
 
 FileDTO::FileDTO(std::string name, std::string absolutePath, bool folder, std::string contents, std::string extension,
                  uint64_t sizeBytes) :
         name(std::move(name)), absolutePath(std::move(absolutePath)), folder(folder), contents(std::move(contents)),
-        extension(std::move(extension)), sizeBytes(sizeBytes), score(0.0) {}
+        extension(std::move(extension)), sizeBytes(sizeBytes), score(0.0) {
+    std::replace(this->absolutePath.begin(), this->absolutePath.end(), '\\', '/');
+}
 
 FileDTO::FileDTO(const std::filesystem::directory_entry &entry)
         : score(0.0) {
     name = entry.path().filename().string();
     absolutePath = entry.path().string();
+    std::replace(absolutePath.begin(), absolutePath.end(), '\\', '/');
     folder = entry.is_directory();
     if (!folder) {
         std::ifstream file(absolutePath, std::ios::binary);
