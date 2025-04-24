@@ -16,10 +16,11 @@ std::vector<std::string> SuggestionRepository::findSuggestionsByPrefix(const std
         pqxx::connection conn(dbConnectionString);
         pqxx::work txn(conn);
         std::string sql =
-                "SELECT DISTINCT query "
+                "SELECT query "
                 "FROM public.search_history "
                 "WHERE query LIKE $1 || '%' "
-                "ORDER BY timestamp DESC "
+                "GROUP BY query "
+                "ORDER BY MAX(timestamp) DESC "
                 "LIMIT $2";
         pqxx::result res = txn.exec_params(sql, prefix, limit);
         suggestions.reserve(res.size());
