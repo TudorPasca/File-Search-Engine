@@ -7,7 +7,7 @@
 namespace fs = std::filesystem;
 
 namespace SimpleScoreParams {
-    ///Basic Weights
+    ///Factor Weights
     constexpr double W_RECENCY = 0.4;
     constexpr double W_PATH = 0.3;
     constexpr double W_SIZE = 0.3;

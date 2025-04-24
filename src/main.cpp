@@ -35,8 +35,6 @@ int main() {
     auto indexController = std::make_shared<IndexController>(indexService);
     controllers.push_back(indexController);
 
-    indexBuilder->indexFiles("D:\\Tudor\\School");
-
     ///Searching
     auto fileRepository = std::make_shared<FileRepository>(DB_CONNECTION_STRING);
     auto queryParserService = std::make_shared<QueryParserService>();

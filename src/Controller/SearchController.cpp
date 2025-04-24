@@ -17,6 +17,7 @@ void SearchController::registerRoutes(crow::App<crow::CORSHandler> &app) {
                             fileJson["path"] = file.getAbsolutePath();
                             fileJson["is_folder"] = file.isFolder();
                             fileJson["content"] = file.getContents();
+                            fileJson["score"] = file.getScore();
                             jsonList[index++] = std::move(fileJson);
                         }
                         crow::json::wvalue jsonResponse;
