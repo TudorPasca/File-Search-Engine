@@ -5,9 +5,10 @@
 #include "../DTO/FileDTO.h"
 #include "../Repository/FileRepository.h"
 #include "QueryParserService.h"
+#include "SearchServiceCache/ISearchService.h"
 #include "SearchSuggestions/ISearchObserver.h"
 
-class SearchService {
+class SearchService: public ISearchService {
 public:
     SearchService(std::shared_ptr<FileRepository> repository, std::shared_ptr<QueryParserService> queryParser)
             : repository(std::move(repository)), queryParser(std::move(queryParser)) {}
@@ -15,7 +16,7 @@ public:
     void addObserver(std::shared_ptr<ISearchObserver> observer);
     void removeObserver(const std::shared_ptr<ISearchObserver>& observer);
 
-    std::vector<FileDTO> getFiles(const std::string &searchQuery);
+    std::vector<FileDTO> getFiles(const std::string &searchQuery) override;
 
 private:
     std::shared_ptr<FileRepository> repository;

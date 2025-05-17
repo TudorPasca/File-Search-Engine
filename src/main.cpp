@@ -15,6 +15,8 @@
 #include "../include/IndexBuilder/FileLogger.h"
 #include "../include/IndexBuilder/FileScoringService.h"
 #include "../include/Repository/SuggestionRepository.h"
+#include "../include/Service/SearchServiceCache/SearchCacheProxy.h"
+#include "../include/Service/SearchServiceCache/Cache/LRUCache.h"
 #include "../include/Service/SearchSuggestions/SuggestionService.h"
 #include "../include/Service/SearchSuggestions/SearchHistoryTracker.h"
 
@@ -39,6 +41,9 @@ int main() {
     auto fileRepository = std::make_shared<FileRepository>(DB_CONNECTION_STRING);
     auto queryParserService = std::make_shared<QueryParserService>();
     auto searchService = std::make_shared<SearchService>(fileRepository, queryParserService);
+    constexpr size_t CACHE_CAPACITY = 3;
+    auto cache = std::make_shared<LRUCache<std::string, std::vector<FileDTO>>>(CACHE_CAPACITY);
+    auto searchServiceProxy = std::make_shared<SearchCacheProxy>(cache, searchService);
 
     //Suggestions
     auto suggestionRepository = std::make_shared<SuggestionRepository>(DB_CONNECTION_STRING);
@@ -46,7 +51,7 @@ int main() {
     auto searchHistoryTracker = std::make_shared<SearchHistoryTracker>(DB_CONNECTION_STRING);
     searchService->addObserver(searchHistoryTracker);
 
-    auto searchController = std::make_shared<SearchController>(searchService, suggestionService);
+    auto searchController = std::make_shared<SearchController>(searchServiceProxy, suggestionService);
     controllers.push_back(searchController);
 
     crow::App<crow::CORSHandler> app;
