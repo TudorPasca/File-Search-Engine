@@ -19,6 +19,8 @@
 #include "../include/Service/SearchServiceCache/Cache/LRUCache.h"
 #include "../include/Service/SearchSuggestions/SuggestionService.h"
 #include "../include/Service/SearchSuggestions/SearchHistoryTracker.h"
+#include "../include/Service/SpellingCorrection/ContentSpellingDecorator.h"
+#include "../include/Service/SpellingCorrection/SpellingCorrectorService.h"
 
 int main() {
     std::vector<std::shared_ptr<IController>> controllers;
@@ -41,9 +43,15 @@ int main() {
     auto fileRepository = std::make_shared<FileRepository>(DB_CONNECTION_STRING);
     auto queryParserService = std::make_shared<QueryParserService>();
     auto searchService = std::make_shared<SearchService>(fileRepository, queryParserService);
+
+    //Spell Correction Decorator
+    auto spellingCorrector = std::make_shared<SpellingCorrectorService>("big.txt");
+    auto contentCorrectionDecorator = std::make_shared<ContentSpellingDecorator>(searchService, spellingCorrector);
+
+    //Cache Layer Proxy
     constexpr size_t CACHE_CAPACITY = 3;
     auto cache = std::make_shared<LRUCache<std::string, std::vector<FileDTO>>>(CACHE_CAPACITY);
-    auto searchServiceProxy = std::make_shared<SearchCacheProxy>(cache, searchService);
+    auto searchServiceProxy = std::make_shared<SearchCacheProxy>(cache, contentCorrectionDecorator);
 
     //Suggestions
     auto suggestionRepository = std::make_shared<SuggestionRepository>(DB_CONNECTION_STRING);
